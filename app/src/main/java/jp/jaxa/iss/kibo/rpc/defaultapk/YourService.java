@@ -29,7 +29,8 @@ public class YourService extends KiboRpcService {
     @Override
     protected void runPlan1(){
         Log.i("Bla_ckB","start");
-        moveToWrapper(10.71000, -7.70000, 4.48000,0, 0.707, 0, 0.707);
+        moveToEuler(10.71000, -7.70000, 4.48000,0,90,0);
+        api.saveMatImage(api.getMatNavCam(),"up.png");
         moveToAr(10.71000, -7.70000, 4.48000,0, 0.707, 0, 0.707);
         api.reportMissionCompletion();
     }
@@ -69,12 +70,13 @@ public class YourService extends KiboRpcService {
 
         int i = 0;
 
-        float[] eu = new float[]{};
+        double[] eu = new double[]{};
 
         do {
             Log.i("AR[count]:", String.valueOf(i));
             api.moveTo(point, quaternion, true);
             eu = DetectAR(api.getMatNavCam());
+            moveToEuler(pos_x,pos_y,pos_z,eu[3],eu[2]-90,eu[1]);
             ++i;
         } while (i < 5 && eu == null);
 
@@ -87,7 +89,7 @@ public class YourService extends KiboRpcService {
 
 
 
-    float[] DetectAR(Mat matImage) {
+    double[] DetectAR(Mat matImage) {
         Log.i("AR[status]:", " start");
         long startTime = SystemClock.elapsedRealtime();
 
@@ -113,10 +115,10 @@ public class YourService extends KiboRpcService {
             Aruco.estimatePoseSingleMarkers(corners, 0.05f, camMat, distCoeffs, rvecs, tvecs);
             //}
 
-            List<float[]> arucos = new ArrayList<>();
+            List<double[]> arucos = new ArrayList<>();
 
 
-            for(int i = 0; i < ids.size(); i++)
+            for(int i = 0; i < values.size(); i++)
             {
                 Mat rotationMatrix = new Mat();
                 Mat r = new Mat();
@@ -124,24 +126,19 @@ public class YourService extends KiboRpcService {
                 Calib3d.Rodrigues(rvecs.row(i), rotationMatrix);
                 double[] eulerAngles = Calib3d.RQDecomp3x3(rotationMatrix, r, q);
 
-                float pitch = (float) eulerAngles[0];
-                float yaw = (float) eulerAngles[1];
-                float roll = (float) eulerAngles[2];
+                //Log.i("AR[EU RAW]:", "X"+eulerAngles[0]+"Y"+(-eulerAngles[1])+"Z"+(-eulerAngles[2]));
 
-                arucos.add(new float[]{values.get(i),yaw,pitch,roll});
+                arucos.add(new double[]{values.get(i),eulerAngles[0],-eulerAngles[1],-eulerAngles[2]});
             }
 
-            float[] eu = new float[]{};
+            double[] eu = new double[]{};
 
             /*
-            for(int i=0;i<arucos.size();i++){
-                float[] aruco = arucos.get(i);
-                Log.i("AR[status]:",Arrays.toString(aruco));
-                if(aruco[0] == 4){
-                    eu = new float[]{aruco[1],aruco[2],aruco[3]};
-                }
-            }*/
-
+            eu[1] = (arucos.get(0)[1] + arucos.get(1)[1]+ arucos.get(2)[1] +arucos.get(3)[1]) / 4;
+            eu[2] = (arucos.get(0)[2] + arucos.get(1)[2]+ arucos.get(2)[2] +arucos.get(3)[2]) / 4;
+            eu[3] = (arucos.get(0)[3] + arucos.get(1)[3]+ arucos.get(2)[3] +arucos.get(3)[3]) / 4;
+            */
+            eu = arucos.get(0);
 
             return eu;
         } catch (Exception e) {
@@ -162,9 +159,9 @@ public class YourService extends KiboRpcService {
     }
 
     public void moveToEuler(double pos_x, double pos_y, double pos_z, double eu_x, double eu_y, double eu_z) {
-        double yaw=Math.toRadians(eu_x);
+        double roll=Math.toRadians(eu_x);
         double pitch=Math.toRadians(eu_y);
-        double roll=Math.toRadians(eu_z);
+        double yaw=Math.toRadians(eu_z);
 
         double cosYaw = Math.cos(yaw / 2);
         double cosPitch = Math.cos(pitch / 2);
@@ -174,11 +171,19 @@ public class YourService extends KiboRpcService {
         double sinPitch = Math.sin(pitch / 2);
         double sinRoll = Math.sin(roll/2);
 
-
-        double qua_x sinYaw * sinPitch * cosRoll - cosYaw * cosPitch * sinRoll;
-        double qua_y = sinYaw * cosPitch * cosRoll - cosYaw * sinPitch * sinRoll;
-        double qua_z = cosYaw * sinPitch * cosRoll - cosYaw * sinPitch * sinRoll;
+        /*
+        double qua_x = sinYaw * sinPitch * cosRoll + cosYaw * cosPitch * sinRoll;
+        double qua_y = sinYaw * cosPitch * cosRoll + cosYaw * sinPitch * sinRoll;
+        double qua_z = cosYaw * sinPitch * cosRoll - sinYaw * cosPitch * sinRoll;
         double qua_w = cosYaw * cosPitch * cosRoll - sinYaw * sinPitch * sinRoll;
+        */
+        double qua_x = sinRoll * cosPitch * cosYaw + cosRoll * sinPitch * sinYaw;
+        double qua_y = cosRoll * sinPitch * cosYaw - sinRoll * cosPitch * sinYaw;
+        double qua_z = cosRoll * cosPitch * sinYaw + sinRoll * sinPitch * cosYaw;
+        double qua_w = cosRoll * cosPitch * cosYaw - sinRoll * sinPitch * sinYaw;
+
+        Log.i("AR[QUA]:", "X"+String.valueOf(eu_x)+"Y"+String.valueOf(eu_y)+"Z"+String.valueOf(eu_z));
+        Log.i("AR[QUA]:", "X"+String.valueOf(qua_x)+"Y"+String.valueOf(qua_y)+"Z"+String.valueOf(qua_z)+"W"+String.valueOf(qua_w));
 
         final int LOOP_MAX = 5;
         final Point point = new Point(pos_x, pos_y, pos_z);
