@@ -1,29 +1,24 @@
 package jp.jaxa.iss.kibo.rpc.defaultapk;
 
-import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
-
 import android.os.SystemClock;
 import android.util.Log;
 
 import org.opencv.aruco.Aruco;
 import org.opencv.aruco.DetectorParameters;
-import org.opencv.core.Mat;
 import org.opencv.aruco.Dictionary;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.core.CvType;
 import org.opencv.calib3d.Calib3d;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
 
 import java.util.ArrayList;
 import java.util.List;
-import  java.util.Arrays;
 
 import gov.nasa.arc.astrobee.Result;
 import gov.nasa.arc.astrobee.types.Point;
 import gov.nasa.arc.astrobee.types.Quaternion;
+import jp.jaxa.iss.kibo.rpc.api.KiboRpcService;
 
-/**
- * Class meant to handle commands from the Ground Data System and execute them in Astrobee
- */
+import purgatory.kibo.Calculate;
 
 public class YourService extends KiboRpcService {
     @Override
@@ -89,11 +84,11 @@ public class YourService extends KiboRpcService {
 
 
 
-    double[] DetectAR(Mat matImage) {
+    private double[] DetectAR(Mat matImage) {
         Log.i("AR[status]:", " start");
         long startTime = SystemClock.elapsedRealtime();
 
-        Mat ids = new Mat();
+        Mat _ids = new Mat();
         List<Mat> rejectedCondinates = new ArrayList<>();
         Dictionary dictionary = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
         List<Mat> corners = new ArrayList<>();
@@ -109,8 +104,8 @@ public class YourService extends KiboRpcService {
         Mat tvecs = new Mat();
 
         try {
-            Aruco.detectMarkers(matImage, dictionary, corners, ids, parameter);
-            List<Integer> values = flatten(ids);
+            Aruco.detectMarkers(matImage, dictionary, corners, _ids, parameter);
+            List<Integer> ids = new Calculate().flatten(_ids);
             //for(int i = 0;i<values.size();i++) {
             Aruco.estimatePoseSingleMarkers(corners, 0.05f, camMat, distCoeffs, rvecs, tvecs);
             //}
@@ -118,7 +113,7 @@ public class YourService extends KiboRpcService {
             List<double[]> arucos = new ArrayList<>();
 
 
-            for(int i = 0; i < values.size(); i++)
+            for(int i = 0; i < ids.size(); i++)
             {
                 Mat rotationMatrix = new Mat();
                 Mat r = new Mat();
@@ -128,7 +123,7 @@ public class YourService extends KiboRpcService {
 
                 //Log.i("AR[EU RAW]:", "X"+eulerAngles[0]+"Y"+(-eulerAngles[1])+"Z"+(-eulerAngles[2]));
 
-                arucos.add(new double[]{values.get(i),eulerAngles[0],-eulerAngles[1],-eulerAngles[2]});
+                arucos.add(new double[]{ids.get(i),eulerAngles[0],-eulerAngles[1],-eulerAngles[2]});
             }
 
             double[] eu = new double[]{};
@@ -148,17 +143,7 @@ public class YourService extends KiboRpcService {
         return null;
     }
 
-    List<Integer> flatten(Mat src) {
-        List<Integer> values = new ArrayList<>();
-        for (int i = 0; i < src.rows(); i++) {
-            for (int j = 0; j < src.cols(); j++) {
-                values.add((int)src.get(i,j)[0]);
-            }
-        }
-        return values;
-    }
-
-    public void moveToEuler(double pos_x, double pos_y, double pos_z, double eu_x, double eu_y, double eu_z) {
+    private void moveToEuler(double pos_x, double pos_y, double pos_z, double eu_x, double eu_y, double eu_z) {
         double roll=Math.toRadians(eu_x);
         double pitch=Math.toRadians(eu_y);
         double yaw=Math.toRadians(eu_z);
