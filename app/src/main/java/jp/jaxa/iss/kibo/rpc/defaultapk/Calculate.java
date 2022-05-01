@@ -7,13 +7,13 @@ import java.util.List;
 import org.opencv.core.Mat;
 
 public class Calculate {
-    public double[] toQuaternion(double[] euler) {
+    public double[] EulertoQuaternion(double[] euler) {
 
         Log.i("Calulate toQuaternion [ Euler ]:", "X: "+euler[0]+" Y: "+euler[1]+" Z: "+euler[2]);
 
-        double roll = Math.toRadians(euler[0]);
-        double pitch = Math.toRadians(euler[1]);
         double yaw = Math.toRadians(euler[2]);
+        double pitch = Math.toRadians(euler[1]);
+        double roll = Math.toRadians(euler[0]);
 
         double cosYaw = Math.cos(yaw / 2);
         double cosPitch = Math.cos(pitch / 2);
