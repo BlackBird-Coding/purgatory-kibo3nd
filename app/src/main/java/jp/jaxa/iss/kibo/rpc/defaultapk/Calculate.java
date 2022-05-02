@@ -34,6 +34,9 @@ public class Calculate {
     }
 
     public double[] combineQuaternion(double[] oldQuaternion,double[] newQuaternion){
+        Log.i("Calculate combineQuaternion [ RQuaternion ]:", "X: "+ oldQuaternion[0] +" Y: "+ oldQuaternion[1] +" Z: "+ oldQuaternion[2] +" W: "+ oldQuaternion[3] );
+        Log.i("Calculate combineQuaternion [ RQuaternion2 ]:", "X: "+ newQuaternion[0] +" Y: "+ newQuaternion[1] +" Z: "+ newQuaternion[2] +" W: "+ newQuaternion[3] );
+
         double quaX = oldQuaternion[3]*newQuaternion[0] + oldQuaternion[0]*newQuaternion[3] + oldQuaternion[1]*newQuaternion[2] - oldQuaternion[2]*newQuaternion[1];
         double quaY = oldQuaternion[3]*newQuaternion[1] + oldQuaternion[1]*newQuaternion[3] + oldQuaternion[2]*newQuaternion[0] - oldQuaternion[0]*newQuaternion[2];
         double quaZ = oldQuaternion[3]*newQuaternion[2] + oldQuaternion[2]*newQuaternion[3] + oldQuaternion[0]*newQuaternion[1] - oldQuaternion[1]*newQuaternion[0];

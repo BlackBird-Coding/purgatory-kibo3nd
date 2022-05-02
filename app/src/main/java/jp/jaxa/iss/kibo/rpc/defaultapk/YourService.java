@@ -31,11 +31,11 @@ public class YourService extends KiboRpcService {
         moveToWrapper(10.71000, -7.70000, 4.48000,0, 0.707, 0, 0.707);
         api.reportPoint1Arrival();
 
-        moveToAr(10.71000, -7.70000, 4.48000,0, 0.707, 0, 0.707);
+       /* moveToAr(10.71000, -7.70000, 4.48000,0, 0.707, 0, 0.707);
         api.laserControl(true);
         api.saveMatImage(api.getMatNavCam(),"target1.png");
         api.takeTarget1Snapshot();
-        api.laserControl(false);
+        api.laserControl(false);*/
 
         moveToWrapper(11.3,-8.0000,4.4,0,0,-0.707, 0.707);
         moveToWrapper(11.3,-9.5000,4.4,0,0,-0.707, 0.707);
@@ -143,7 +143,6 @@ public class YourService extends KiboRpcService {
         Mat image = new Mat();
 
         Imgproc.undistort(matImage,image,camMat,distCoeffs);
-        //api.saveMatImage(image,"undistorted.jpg");
 
 
         try {
@@ -179,28 +178,6 @@ public class YourService extends KiboRpcService {
            Log.i("AR[status]:", " Not detected");
         }
         return null;
-    }
-
-    private void moveToEuler(double pos_x, double pos_y, double pos_z, double eu_x, double eu_y, double eu_z) {
-
-        
-        double[] oldQuaternion = new double[]{0, 0.707, 0, 0.707};
-        
-        double[] newQuaternion = new Calculate().EulertoQuaternion(new double[]{eu_x,eu_y,eu_z});
-
-        double[] Quaternion = new Calculate().combineQuaternion(oldQuaternion, newQuaternion);
-
-        final int LOOP_MAX = 5; 
-        final Point point = new Point(pos_x, pos_y, pos_z);
-        final Quaternion quaternion = new Quaternion((float) Quaternion[0], (float) Quaternion[1], (float) Quaternion[2], (float) Quaternion[3]);
-
-        int i = 0;
-        Result result;
-
-        do {
-            result = api.moveTo(point, quaternion, true);
-            ++i;
-        } while (!result.hasSucceeded() && i < LOOP_MAX);
     }
 }
 
