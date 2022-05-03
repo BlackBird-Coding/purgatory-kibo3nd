@@ -9,6 +9,7 @@ import org.opencv.aruco.Dictionary;
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.core.Core;
 
@@ -31,22 +32,23 @@ public class YourService extends KiboRpcService {
         moveToWrapper(10.71000, -7.70000, 4.48000,0, 0.707, 0, 0.707);
         api.reportPoint1Arrival();
 
-       /* moveToAr(10.71000, -7.70000, 4.48000,0, 0.707, 0, 0.707);
+       /*  moveToAr(10.71000, -7.70000, 4.48000,0, 0.707, 0, 0.707);
         api.laserControl(true);
-        api.saveMatImage(api.getMatNavCam(),"target1.png");
         api.takeTarget1Snapshot();
-        api.laserControl(false);*/
+        api.laserControl(false);
+*/
+
 
         moveToWrapper(11.3,-8.0000,4.4,0,0,-0.707, 0.707);
         moveToWrapper(11.3,-9.5000,4.4,0,0,-0.707, 0.707);
         moveToWrapper(11.27460, -9.92284, 5.29881,0, 0, -0.707, 0.707);
 
-
+        //x-0.07 z+0.17
         moveToAr(11.27460, -9.92284, 5.29881,0, 0, -0.707, 0.707);
         api.laserControl(true);
-        api.saveMatImage(api.getMatNavCam(),"target2.png");
         api.takeTarget2Snapshot();
         api.laserControl(false);
+
 
         api.reportMissionCompletion();
     }
@@ -105,6 +107,7 @@ public class YourService extends KiboRpcService {
             double[] newQuaternion = new Calculate().EulertoQuaternion(new double[]{eu[0],eu[1],eu[2]});
             double[] result = new Calculate().combineQuaternion(oldQuaternion, newQuaternion);
 
+
             moveToWrapper(nPoint.getX(),nPoint.getY(),nPoint.getZ(),result[0],result[1],result[2],result[3]);
 
             ++i;
@@ -149,13 +152,42 @@ public class YourService extends KiboRpcService {
             Aruco.detectMarkers(image, dictionary, corners, _ids, parameters);
             List<Integer> ids = new Calculate().flatten(_ids);
             //for(int i = 0;i<values.size();i++) {
-            Aruco.estimatePoseSingleMarkers(corners, 0.05f, camMat, distCoeffs, rvecs, tvecs);
+            //Aruco.estimatePoseSingleMarkers(corners, 0.05f, camMat, distCoeffs, rvecs, tvecs);
             //}
 
+            /* for (int i = 0; i < ids.size(); i++) {
+                Aruco.drawAxis(image,  camMat, distCoeffs, rvecs, tvecs, 0.05f);
+            }*/
+
+            int centerX = 0;
+            int centerY = 0;
+
+            for (int i = 0; i < 4; i++) {
+                for(int j=0; j<4; j++) {
+                    centerX += corners.get(i).get(0, j)[0];
+                    centerY += corners.get(i).get(0, j)[1];
+                    Imgproc.circle(image ,new org.opencv.core.Point(corners.get(i).get(0, j)[0],corners.get(i).get(0, j)[1]), 1, new Scalar(200, 100, 100), 3, 8, 0);
+                }
+            }
+
+            org.opencv.core.Point center = new org.opencv.core.Point(centerX /16,centerY/16);
+            Imgproc.circle(image ,center, 1, new Scalar(0, 100, 100), 3, 8, 0);
+
+            double width = image.size().width;
+            double height = image.size().height;
+
+            api.saveMatImage(image,"test.png");
+            api.laserControl(true);
+            api.takeTarget2Snapshot();
+            api.laserControl(false);
+
+            api.reportMissionCompletion();
+
+            /*
             List<double[]> arucos = new ArrayList<>();
 
 
-            for(int i = 0; i < ids.size(); i++)
+             for(int i = 0; i < ids.size(); i++)
             {
                 Mat rotationMatrix = new Mat();
                 Mat r = new Mat();
@@ -171,6 +203,8 @@ public class YourService extends KiboRpcService {
                     (arucos.get(0)[2] + arucos.get(1)[2] + arucos.get(2)[2] + arucos.get(3)[2]) / 4,
                     (arucos.get(0)[3] + arucos.get(1)[3] + arucos.get(2)[3] + arucos.get(3)[3]) / 4};
 
+             */
+            double[] eu = new double[]{};
 
             Log.i("AR[status]:", " end");
             return eu;
@@ -179,5 +213,6 @@ public class YourService extends KiboRpcService {
         }
         return null;
     }
+
 }
 
