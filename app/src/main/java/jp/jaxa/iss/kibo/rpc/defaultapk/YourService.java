@@ -29,26 +29,29 @@ public class YourService extends KiboRpcService {
     protected void runPlan1(){
         Log.i("Bla_ckB","start");
         api.startMission();
+        moveToWrapper(10.71000, -7.70000, 4.58000,0, 0.707, 0, 0.707);
         moveToWrapper(10.71000, -7.70000, 4.48000,0, 0.707, 0, 0.707);
         api.reportPoint1Arrival();
 
-       /*  moveToAr(10.71000, -7.70000, 4.48000,0, 0.707, 0, 0.707);
-        api.laserControl(true);
-        api.takeTarget1Snapshot();
-        api.laserControl(false);
-*/
+      /*  api.saveMatImage(api.getMatNavCam(),"0.png");
+        moveToWrapper(10.81000, -7.70000, 4.48000,0, 0.707, 0, 0.707);
+        api.saveMatImage(api.getMatNavCam(),"x10.png");
+        moveToWrapper(10.91000, -7.70000, 4.48000,0, 0.707, 0, 0.707);
+        api.saveMatImage(api.getMatNavCam(),"x20.png");
+        moveToWrapper(10.71000, -7.80000, 4.48000,0, 0.707, 0, 0.707);
+        api.saveMatImage(api.getMatNavCam(),"y10.png");
+        moveToWrapper(10.71000, -7.90000, 4.48000,0, 0.707, 0, 0.707);
+        api.saveMatImage(api.getMatNavCam(),"y20.png");
+    */
+       moveToTarget1(10.71000, -7.70000, 4.48000,0, 0.707, 0, 0.707);
 
 
         moveToWrapper(11.3,-8.0000,4.4,0,0,-0.707, 0.707);
         moveToWrapper(11.3,-9.5000,4.4,0,0,-0.707, 0.707);
-        moveToWrapper(11.27460, -9.92284, 5.29881,0, 0, -0.707, 0.707);
+        moveToWrapper(11.27460, -9.7, 5.29881,0, 0, -0.707, 0.707);
 
         //x-0.07 z+0.17
-        moveToAr(11.27460, -9.92284, 5.29881,0, 0, -0.707, 0.707);
-        api.laserControl(true);
-        api.takeTarget2Snapshot();
-        api.laserControl(false);
-
+        moveToTarget2(11.27460, -9.92284, 5.29881,0, 0, -0.707, 0.707);
 
         api.reportMissionCompletion();
     }
@@ -79,46 +82,38 @@ public class YourService extends KiboRpcService {
         } while (!result.hasSucceeded() && i < LOOP_MAX);
     }
 
-    private void moveToAr(double pos_x, double pos_y, double pos_z, double qua_x, double qua_y, double qua_z,
-                               double qua_w) {
+    private  void  moveToTarget1(double pos_x, double pos_y, double pos_z, double qua_x, double qua_y, double qua_z,
+                                 double qua_w){
+        double[] result;
+        moveToWrapper(pos_x,pos_y, pos_z+0.1, qua_x,qua_y,qua_z, qua_w);
+        moveToWrapper(pos_x,pos_y, pos_z, qua_x,qua_y,qua_z, qua_w);
+        wait(2000);
+        result = DetectAR1(api.getMatNavCam());
+        moveToWrapper(pos_x+result[0],pos_y+result[1], pos_z, qua_x,qua_y,qua_z, qua_w);
+        wait(1000);
+        api.laserControl(true);
+        api.takeTarget1Snapshot();
+        api.saveMatImage(api.getMatNavCam(),"target1.png");
+        api.laserControl(false);
+    }
 
-        final int LOOP_MAX = 5;
-        final Point point = new Point(pos_x, pos_y, pos_z);
-        final Quaternion quaternion = new Quaternion((float) qua_x, (float) qua_y, (float) qua_z, (float) qua_w);
-
-        int i = 0;
-
-        double[] eu = new double[]{};
-
-        do {
-            Log.i("AR[count]:", String.valueOf(i));
-            api.moveTo(point, quaternion, true);
-
-            Kinematics kinematics = api.getRobotKinematics();
-
-            api.flashlightControlFront((float)0.125);
-            eu = DetectAR(api.getMatNavCam());
-            api.flashlightControlFront(0);
-
-            Point nPoint = kinematics.getPosition();
-            Quaternion nQuaternion = kinematics.getOrientation();
-
-            double[] oldQuaternion = new double[]{nQuaternion.getX(),nQuaternion.getY(),nQuaternion.getZ(),nQuaternion.getW()};
-            double[] newQuaternion = new Calculate().EulertoQuaternion(new double[]{eu[0],eu[1],eu[2]});
-            double[] result = new Calculate().combineQuaternion(oldQuaternion, newQuaternion);
-
-
-            moveToWrapper(nPoint.getX(),nPoint.getY(),nPoint.getZ(),result[0],result[1],result[2],result[3]);
-
-            ++i;
-        } while (i < 5 && eu == null);
-
-        return;
+    private  void  moveToTarget2(double pos_x, double pos_y, double pos_z, double qua_x, double qua_y, double qua_z,
+                             double qua_w){
+        double[] result;
+        moveToWrapper(pos_x,pos_y, pos_z, qua_x,qua_y,qua_z, qua_w);
+        wait(1000);
+        result = DetectAR2(api.getMatNavCam());
+        moveToWrapper(pos_x,pos_y+0.1, pos_z+result[1], qua_x,qua_y,qua_z, qua_w);
+        moveToWrapper(pos_x+result[0],pos_y, pos_z+result[1], qua_x,qua_y,qua_z, qua_w);
+        wait(1000);
+        api.laserControl(true);
+        api.takeTarget2Snapshot();
+        api.saveMatImage(api.getMatNavCam(),"target2.png");
+        api.laserControl(false);
     }
 
 
-
-    private double[] DetectAR(Mat matImage) {
+    private double[] DetectAR1(Mat matImage) {
         Log.i("AR[status]:", " start");
         long startTime = SystemClock.elapsedRealtime();
 
@@ -151,13 +146,6 @@ public class YourService extends KiboRpcService {
         try {
             Aruco.detectMarkers(image, dictionary, corners, _ids, parameters);
             List<Integer> ids = new Calculate().flatten(_ids);
-            //for(int i = 0;i<values.size();i++) {
-            //Aruco.estimatePoseSingleMarkers(corners, 0.05f, camMat, distCoeffs, rvecs, tvecs);
-            //}
-
-            /* for (int i = 0; i < ids.size(); i++) {
-                Aruco.drawAxis(image,  camMat, distCoeffs, rvecs, tvecs, 0.05f);
-            }*/
 
             int centerX = 0;
             int centerY = 0;
@@ -175,43 +163,106 @@ public class YourService extends KiboRpcService {
 
             double width = image.size().width;
             double height = image.size().height;
+            Imgproc.circle(image , new org.opencv.core.Point(width/2,height/2), 2, new Scalar(0, 100, 100), 3, 8, 0);
 
-            api.saveMatImage(image,"test.png");
-            api.laserControl(true);
-            api.takeTarget2Snapshot();
-            api.laserControl(false);
+            api.saveMatImage(image,"debug1.png");
 
-            api.reportMissionCompletion();
+            double newY = ((width/2 - centerX/16)/800)-0.031;
+            double newX = ((height/2 - centerY/16)/800)-0.05;
 
-            /*
-            List<double[]> arucos = new ArrayList<>();
-
-
-             for(int i = 0; i < ids.size(); i++)
-            {
-                Mat rotationMatrix = new Mat();
-                Mat r = new Mat();
-                Mat q = new Mat();
-                Calib3d.Rodrigues(rvecs.row(i), rotationMatrix);
-                double[] eulerAngles = Calib3d.RQDecomp3x3(rotationMatrix, r, q);
-
-                arucos.add(new double[]{ids.get(i),eulerAngles[0],-eulerAngles[1],-eulerAngles[2]});
-            }
-
-
-            double[] eu = new double[]{(arucos.get(0)[1] + arucos.get(1)[1] + arucos.get(2)[1] + arucos.get(3)[1]) / 4,
-                    (arucos.get(0)[2] + arucos.get(1)[2] + arucos.get(2)[2] + arucos.get(3)[2]) / 4,
-                    (arucos.get(0)[3] + arucos.get(1)[3] + arucos.get(2)[3] + arucos.get(3)[3]) / 4};
-
-             */
-            double[] eu = new double[]{};
+            Log.i("cX",String.valueOf(centerX/16));
+            Log.i("cY",String.valueOf(centerY/16));
+            Log.i("newX", String.valueOf(newX));
+            Log.i("newY", String.valueOf(newY));
 
             Log.i("AR[status]:", " end");
-            return eu;
+            return new double[]{newX,newY};
         } catch (Exception e) {
-           Log.i("AR[status]:", " Not detected");
+            Log.i("AR[status]:", " Not detected");
         }
         return null;
+    }
+
+
+    private double[] DetectAR2(Mat matImage) {
+        Log.i("AR[status]:", " start");
+        long startTime = SystemClock.elapsedRealtime();
+
+        Mat _ids = new Mat();
+        List<Mat> rejectedCondinates = new ArrayList<>();
+        Dictionary dictionary = Aruco.getPredefinedDictionary(Aruco.DICT_5X5_250);
+        List<Mat> corners = new ArrayList<>();
+        DetectorParameters parameters = DetectorParameters.create();
+        parameters.set_adaptiveThreshWinSizeMin(5);
+        parameters.set_adaptiveThreshWinSizeMax(10);
+        parameters.set_minMarkerPerimeterRate(0.05d);
+        parameters.set_maxMarkerPerimeterRate(5.0d);
+        parameters.set_errorCorrectionRate(0.03d);
+
+        double[][] camIntrinsics = api.getNavCamIntrinsics();
+        Mat camMat = new Mat(3, 3, CvType.CV_32FC1);
+        Mat distCoeffs = new Mat(1, 5, CvType.CV_32FC1);
+
+        camMat.put(0,0,camIntrinsics[0]);
+        distCoeffs.put(0,0,camIntrinsics[1]);
+
+        Mat rvecs = new Mat();
+        Mat tvecs = new Mat();
+
+        Mat image = new Mat();
+
+        Imgproc.undistort(matImage,image,camMat,distCoeffs);
+
+
+        try {
+            Aruco.detectMarkers(image, dictionary, corners, _ids, parameters);
+            List<Integer> ids = new Calculate().flatten(_ids);
+
+            int centerX = 0;
+            int centerY = 0;
+
+            for (int i = 0; i < 4; i++) {
+                for(int j=0; j<4; j++) {
+                    centerX += corners.get(i).get(0, j)[0];
+                    centerY += corners.get(i).get(0, j)[1];
+                    Imgproc.circle(image ,new org.opencv.core.Point(corners.get(i).get(0, j)[0],corners.get(i).get(0, j)[1]), 1, new Scalar(200, 100, 100), 3, 8, 0);
+                }
+            }
+
+            org.opencv.core.Point center = new org.opencv.core.Point(centerX /16,centerY/16);
+            Imgproc.circle(image ,center, 1, new Scalar(0, 100, 100), 3, 8, 0);
+
+            double width = image.size().width;
+            double height = image.size().height;
+            Imgproc.circle(image , new org.opencv.core.Point(width/2,height/2), 2, new Scalar(0, 100, 100), 3, 8, 0);
+
+            api.saveMatImage(image,"debug2.png");
+
+            double newX = ((width/2 - centerX/16)/1000)-0.055;
+            double newZ = (-(height/2 - centerY/16)/1000)+0.045;
+
+            Log.i("cX",String.valueOf(centerX/16));
+            Log.i("cY",String.valueOf(centerY/16));
+            Log.i("newX", String.valueOf(newX));
+            Log.i("newZ", String.valueOf(newZ));
+
+            Log.i("AR[status]:", " end");
+            return new double[]{newX,newZ};
+        } catch (Exception e) {
+            Log.i("AR[status]:", " Not detected");
+        }
+        return null;
+    }
+
+    private void wait(int ms){
+        try
+        {
+            Thread.sleep(ms);
+        }
+        catch(InterruptedException ex)
+        {
+            Thread.currentThread().interrupt();
+        }
     }
 
 }
