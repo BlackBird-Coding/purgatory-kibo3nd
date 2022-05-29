@@ -263,7 +263,7 @@ public class YourService extends KiboRpcService {
         Imgproc.medianBlur(image, image,3);
 
         Imgproc.adaptiveThreshold(image, image, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 23, 80);
-        api.saveMatImage(image,"th.png");
+        //api.saveMatImage(image,"th.png");
         Mat circles = new Mat();
         Imgproc.HoughCircles(image, circles, Imgproc.HOUGH_GRADIENT, 1.0,1000.0, 100.0, 30.0, 30, 55);
         Log.i("Circle col", String.valueOf(circles.cols()));
@@ -273,15 +273,15 @@ public class YourService extends KiboRpcService {
             double[] c = circles.get(0, 0);
             center = new org.opencv.core.Point(Math.round(c[0]), Math.round(c[1]));
             // circle center
-           /* Imgproc.circle(image, center, 1, new Scalar(0, 200, 100), 3, 8, 0);
+            Imgproc.circle(image, center, 1, new Scalar(0, 200, 100), 3, 8, 0);
             // circle outline
             int radius = (int) Math.round(c[2]);
             Imgproc.circle(image, center, radius, new Scalar(80, 0, 255), 3, 8, 0);
             Log.i("Circle x", String.valueOf(center.x));
-            Log.i("Circle y", String.valueOf(center.y));*/
+            Log.i("Circle y", String.valueOf(center.y));
         api.saveMatImage(image,"debug2.png");
-        double newX = -((735 - center.x)/950);//-0.031;
-        double newZ = (-(460 - center.y)/950)+0.03;//+0.02;
+        double newX = -((735 - center.x)/950);
+        double newZ = -((460 - center.y)/768);
         Log.i("new X",String.valueOf(newX));
         Log.i("new Z",String.valueOf(newZ));
         return new double[]{newX,newZ};
