@@ -97,7 +97,7 @@ public class YourService extends KiboRpcService {
         wait(1000);
         api.flashlightControlFront(0.5f);
         result = DetectAR2(api.getMatNavCam());
-        moveToWrapper(pos_x+result[0],pos_y, pos_z+result[1], qua_x,qua_y,qua_z, qua_w);
+        moveToWrapper(pos_x + result[0], pos_y, pos_z + result[1], qua_x, qua_y, qua_z, qua_w);
         wait(1000);
         api.laserControl(true);
         api.takeTarget2Snapshot();
@@ -265,7 +265,7 @@ public class YourService extends KiboRpcService {
         Imgproc.adaptiveThreshold(image, image, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 23, 80);
         //api.saveMatImage(image,"th.png");
         Mat circles = new Mat();
-        Imgproc.HoughCircles(image, circles, Imgproc.HOUGH_GRADIENT, 1.0,1000.0, 100.0, 30.0, 30, 55);
+        Imgproc.HoughCircles(image, circles, Imgproc.HOUGH_GRADIENT, 1.0,100.0, 100.0, 30.0, 30, 55);
         Log.i("Circle col", String.valueOf(circles.cols()));
 
         org.opencv.core.Point center = new org.opencv.core.Point();
@@ -281,7 +281,7 @@ public class YourService extends KiboRpcService {
             Log.i("Circle y", String.valueOf(center.y));
         api.saveMatImage(image,"debug2.png");
         double newX = -((735 - center.x)/950);
-        double newZ = -((460 - center.y)/768);
+        double newZ = -((460 - center.y)/775);
         Log.i("new X",String.valueOf(newX));
         Log.i("new Z",String.valueOf(newZ));
         return new double[]{newX,newZ};
