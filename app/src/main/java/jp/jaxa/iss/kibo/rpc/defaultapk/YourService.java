@@ -79,11 +79,12 @@ public class YourService extends KiboRpcService {
         double[] result;
         moveToWrapper(pos_x,pos_y, pos_z, qua_x,qua_y,qua_z, qua_w);
         wait(1000);
-        //api.flashlightControlFront(0.5f);
+        api.flashlightControlFront(0.025f);
         result = DetectAR1(api.getMatNavCam());
         moveToWrapper(pos_x+result[0],pos_y+result[1], pos_z, qua_x,qua_y,qua_z, qua_w);
         wait(1000);
         api.laserControl(true);
+        api.flashlightControlFront(0f);
         api.takeTarget1Snapshot();
         //api.saveMatImage(api.getMatNavCam(),"target1.png");
         api.laserControl(false);
@@ -95,10 +96,11 @@ public class YourService extends KiboRpcService {
         double[] result;
         moveToWrapper(pos_x,pos_y, pos_z, qua_x,qua_y,qua_z, qua_w);
         wait(1000);
-        api.flashlightControlFront(0.5f);
+        api.flashlightControlFront(0.025f);
         result = DetectAR2(api.getMatNavCam());
         moveToWrapper(pos_x + result[0], pos_y, pos_z + result[1], qua_x, qua_y, qua_z, qua_w);
         wait(1000);
+        api.flashlightControlFront(0f);
         api.laserControl(true);
         api.takeTarget2Snapshot();
         api.saveMatImage(api.getMatNavCam(),"target2.png");
