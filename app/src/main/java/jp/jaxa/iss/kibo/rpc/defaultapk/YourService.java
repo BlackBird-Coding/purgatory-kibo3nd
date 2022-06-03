@@ -38,7 +38,8 @@ public class YourService extends KiboRpcService {
         moveToWrapper(11.27460, -9.7, 5.29881,0, 0, -0.707, 0.707);
 
         //x-0.07 z+0.17
-        moveToTarget2(11.27460, -9.92284, 5.29881,0, 0, -0.707, 0.707);
+
+        moveToTarget2(11.27460, -9.92284, 5.4,0, 0, -0.707, 0.707);
 
         moveToWrapper(11.3,-9.5000,4.4,0,0,-0.707, 0.707);
         moveToWrapper(11.3,-8.0000,4.4,0,0,-0.707, 0.707);
@@ -283,7 +284,7 @@ public class YourService extends KiboRpcService {
             Log.i("Circle y", String.valueOf(center.y));
         api.saveMatImage(image,"debug2.png");
         double newX = -((735 - center.x)/950);
-        double newZ = -((460 - center.y)/775);
+        double newZ = -((460 - center.y)/800 );
         Log.i("new X",String.valueOf(newX));
         Log.i("new Z",String.valueOf(newZ));
         return new double[]{newX,newZ};
