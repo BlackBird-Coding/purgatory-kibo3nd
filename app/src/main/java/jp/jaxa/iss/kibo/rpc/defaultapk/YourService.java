@@ -172,6 +172,7 @@ public class YourService extends KiboRpcService {
             Log.i("newY", String.valueOf(newY));*/
 
             Log.i("AR[status]:", " end");
+            Log.i("AR[status]:", " time:"+startTime);
             return new double[]{newX,newY};
         } catch (Exception e) {
             Log.i("AR[status]:", " Not detected");
@@ -281,7 +282,7 @@ public class YourService extends KiboRpcService {
             Imgproc.circle(image, center, radius, new Scalar(80, 0, 255), 3, 8, 0);
             Log.i("Circle x", String.valueOf(center.x));
             Log.i("Circle y", String.valueOf(center.y));
-        api.saveMatImage(image,"debug2.png");
+        //api.saveMatImage(image,"debug2.png");
         double newX = -((735 - center.x)/950);
         double newZ = -((460 - center.y)/775);
         Log.i("new X",String.valueOf(newX));
