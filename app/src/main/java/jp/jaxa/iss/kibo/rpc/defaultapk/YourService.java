@@ -98,7 +98,7 @@ public class YourService extends KiboRpcService {
         result = DetectAR2(api.getMatNavCam());
         moveToWrapper(pos_x + result[0], pos_y, pos_z + result[1], qua_x, qua_y, qua_z, qua_w);
         wait(1000);
-        toCenter(5);
+        //toCenter(5);
         api.flashlightControlFront(0f);
         api.laserControl(true);
         api.takeTarget2Snapshot();
