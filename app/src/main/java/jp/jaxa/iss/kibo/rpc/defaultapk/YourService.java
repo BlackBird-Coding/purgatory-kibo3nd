@@ -80,7 +80,7 @@ public class YourService extends KiboRpcService {
         //result = DetectAR1(api.getMatNavCam());
         //moveToWrapper(pos_x+result[0],pos_y+result[1], pos_z, qua_x,qua_y,qua_z, qua_w);
         //wait(1000);
-        api.relativeMoveTo(new Point(-0.005, -0.075, 0),new Quaternion(0, (float)0.707, 0, (float)0.707),true);
+        api.relativeMoveTo(new Point(0, -0.09, 0),new Quaternion(0, (float)0.707, 0, (float)0.707),true);
         api.laserControl(true);
         api.flashlightControlFront(0f);
         api.takeTarget1Snapshot();
@@ -98,6 +98,7 @@ public class YourService extends KiboRpcService {
         result = DetectAR2(api.getMatNavCam());
         moveToWrapper(pos_x + result[0], pos_y, pos_z + result[1], qua_x, qua_y, qua_z, qua_w);
         wait(1000);
+        toCenter(5);
         api.flashlightControlFront(0f);
         api.laserControl(true);
         api.takeTarget2Snapshot();
@@ -235,20 +236,22 @@ public class YourService extends KiboRpcService {
         Imgproc.medianBlur(image, image,3);
 
         Imgproc.adaptiveThreshold(image, image, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 23, 80);
+        //api.saveMatImage(image,"th.png");
         Mat circles = new Mat();
-        org.opencv.core.Point center;
         Imgproc.HoughCircles(image, circles, Imgproc.HOUGH_GRADIENT, 1.0,100.0, 100.0, 30.0, 30, 55);
         Log.i("Circle col", String.valueOf(circles.cols()));
 
-            double[] c = circles.get(0, 0);
-            center = new org.opencv.core.Point(Math.round(c[0]), Math.round(c[1]));
-            // circle center
-            Imgproc.circle(image, center, 1, new Scalar(0, 200, 100), 3, 8, 0);
-            // circle outline
-            int radius = (int) Math.round(c[2]);
-            Imgproc.circle(image, center, radius, new Scalar(80, 0, 255), 3, 8, 0);
-            Log.i("Circle x", String.valueOf(center.x));
-            Log.i("Circle y", String.valueOf(center.y));
+        org.opencv.core.Point center;
+
+        double[] c = circles.get(0, 0);
+        center = new org.opencv.core.Point(Math.round(c[0]), Math.round(c[1]));
+        // circle center
+        Imgproc.circle(image, center, 1, new Scalar(0, 200, 100), 3, 8, 0);
+        // circle outline
+        int radius = (int) Math.round(c[2]);
+        Imgproc.circle(image, center, radius, new Scalar(80, 0, 255), 3, 8, 0);
+        Log.i("Circle x", String.valueOf(center.x));
+        Log.i("Circle y", String.valueOf(center.y));
         api.saveMatImage(image,"debug2.png");
         double newX = -((735 - center.x)/950);
         double newZ = -((460 - center.y)/775);
@@ -257,6 +260,59 @@ public class YourService extends KiboRpcService {
         return new double[]{newX,newZ};
     }
 
+    private void toCenter(int n){
+        Log.i("toCenter","start"+n);
+        Mat image = new Mat();
+        double[][] camIntrinsics = api.getNavCamIntrinsics();
+        Mat camMat = new Mat(3, 3, CvType.CV_32FC1);
+        Mat distCoeffs = new Mat(1, 5, CvType.CV_32FC1);
+
+        camMat.put(0,0,camIntrinsics[0]);
+        distCoeffs.put(0,0,camIntrinsics[1]);
+
+
+        Imgproc.undistort(api.getMatNavCam(),image,camMat,distCoeffs);
+
+        Imgproc.medianBlur(image, image,3);
+
+        Imgproc.adaptiveThreshold(image, image, 255, Imgproc.ADAPTIVE_THRESH_MEAN_C, Imgproc.THRESH_BINARY, 23, 80);
+        //api.saveMatImage(image,"th.png");
+        Mat circles = new Mat();
+        Imgproc.HoughCircles(image, circles, Imgproc.HOUGH_GRADIENT, 1.0,100.0, 100.0, 30.0, 30, 55);
+
+        Log.i("Circle col", String.valueOf(circles.cols()));
+
+        org.opencv.core.Point center;
+
+        double[] c = circles.get(0, 0);
+        center = new org.opencv.core.Point(Math.round(c[0]), Math.round(c[1]));
+        // circle center
+        Imgproc.circle(image, center, 1, new Scalar(0, 200, 100), 3, 8, 0);
+        // circle outline
+        int radius = (int) Math.round(c[2]);
+        Imgproc.circle(image, center, radius, new Scalar(80, 0, 255), 3, 8, 0);
+        Log.i("Circle x", String.valueOf(center.x));
+        Log.i("Circle y", String.valueOf(center.y));
+
+        api.saveMatImage(api.getMatNavCam(),(n-1)+"t.png");
+        if(n==0)return;
+        if(735-center.x>15){
+            api.relativeMoveTo(new Point(0.002,0,0),new Quaternion(0, 0, (float)-0.707,  (float)0.707),true);
+            toCenter(n-1);
+        }else if(735-center.x < -15){
+            api.relativeMoveTo(new Point(-0.002,0,0),new Quaternion(0, 0, (float)-0.707,  (float)0.707),true);
+            toCenter(n-1);
+        }
+
+        if(460-center.y>15){
+            api.relativeMoveTo(new Point(0,0,0.002),new Quaternion(0, 0, (float)-0.707,  (float)0.707),true);
+            toCenter(n-1);
+        }else if(460-center.y < -15){
+            api.relativeMoveTo(new Point(0,0,-0.002),new Quaternion(0, 0, (float)-0.707,  (float)0.707),true);
+            toCenter(n-1);
+        }
+
+    }
     private void wait(int ms){
         try
         {
