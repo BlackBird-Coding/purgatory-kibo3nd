@@ -31,14 +31,20 @@ public class YourService extends KiboRpcService {
 
         moveToTarget1(10.71000, -7.70000, 4.53000,0, 0.707, 0, 0.707);
 
-        moveToWrapper(11.3,-9.5000,4.4,0,0,-0.707, 0.707);
+        //moveToWrapper(11.3,-9.5000,4.4,0,0,-0.707, 0.707);
+        //moveToWrapper(11.27460, -9.7, 5.29881,0, 0, -0.707, 0.707);
+
+        moveToWrapper(11.1,-9.5,4.55,0,0,-0.707, 0.707);
         moveToWrapper(11.27460, -9.7, 5.29881,0, 0, -0.707, 0.707);
 
         //x-0.07 z+0.17
         moveToTarget2(11.27460, -9.92284, 5.29881,0, 0, -0.707, 0.707);
 
-        moveToWrapper(11.3,-9.5000,4.4,0,0,-0.707, 0.707);
-        moveToWrapper(11.3,-8.0000,4.4,0,0,-0.707, 0.707);
+        //moveToWrapper(11.3,-9.5000,4.4,0,0,-0.707, 0.707);
+        //moveToWrapper(11.3,-8.0000,4.4,0,0,-0.707, 0.707);
+
+        moveToWrapper(11.27460,-9.5000,4.55,0,0,-0.707, 0.707);
+        moveToWrapper(11.27460,-8.3000,4.55,0,0,-0.707, 0.707);
 
         moveToWrapper(11.27460, -7.89178, 4.96538,0, 0, -0.707, 0.707);
 
@@ -97,6 +103,8 @@ public class YourService extends KiboRpcService {
         api.flashlightControlFront(0.025f);
         result = DetectAR2(api.getMatNavCam());
         moveToWrapper(pos_x + result[0], pos_y, pos_z + result[1], qua_x, qua_y, qua_z, qua_w);
+        //double[] qua = Calculate.EulertoQuaternion(new double[]{0+result[0],0,-90.000+result[1]});
+        //moveToWrapper(pos_x, pos_y, pos_z , qua[0], qua[1], qua[2], qua[3]);
         wait(1000);
         //toCenter(5);
         api.flashlightControlFront(0f);
@@ -255,8 +263,10 @@ public class YourService extends KiboRpcService {
         api.saveMatImage(image,"debug2.png");
         double newX = -((735 - center.x)/950);
         double newZ = -((460 - center.y)/775);
-        Log.i("new X",String.valueOf(newX));
-        Log.i("new Z",String.valueOf(newZ));
+        //double newX = -((735 - center.x)/6);
+        //double newZ = ((460 - center.y)/20);
+        //Log.i("new Q X",String.valueOf(newX));
+        //Log.i("new Q Z",String.valueOf(newZ));
         return new double[]{newX,newZ};
     }
 

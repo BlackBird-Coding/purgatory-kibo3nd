@@ -7,7 +7,8 @@ import java.util.List;
 import org.opencv.core.Mat;
 
 public class Calculate {
-    public double[] EulertoQuaternion(double[] euler) {
+
+    public static double[] EulertoQuaternion(double[] euler) {
 
         Log.i("Calulate toQuaternion [ Euler ]:", "X: "+euler[0]+" Y: "+euler[1]+" Z: "+euler[2]);
 
@@ -33,7 +34,7 @@ public class Calculate {
         return new double[]{quaX,quaY,quaZ,quaW};
     }
 
-    public double[] combineQuaternion(double[] oldQuaternion,double[] newQuaternion){
+    public static double[] combineQuaternion(double[] oldQuaternion,double[] newQuaternion){
         Log.i("Calculate combineQuaternion [ RQuaternion ]:", "X: "+ oldQuaternion[0] +" Y: "+ oldQuaternion[1] +" Z: "+ oldQuaternion[2] +" W: "+ oldQuaternion[3] );
         Log.i("Calculate combineQuaternion [ RQuaternion2 ]:", "X: "+ newQuaternion[0] +" Y: "+ newQuaternion[1] +" Z: "+ newQuaternion[2] +" W: "+ newQuaternion[3] );
 
@@ -47,7 +48,7 @@ public class Calculate {
         return new double[]{quaX,quaY,quaZ,quaW};
     }
 
-    public List<Integer> flatten(Mat src) {
+    public static List<Integer> flatten(Mat src) {
         List<Integer> values = new ArrayList<>();
         for (int i = 0; i < src.rows(); i++) {
             for (int j = 0; j < src.cols(); j++) {
